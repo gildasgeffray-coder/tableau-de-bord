@@ -62,8 +62,9 @@ function setup() {
     tok = Utilities.getUuid().replace(/-/g, '');
     props.setProperty('TOKEN', tok);
   }
-  var cals = CalendarApp.getAllCalendars().map(function (c) { return '  ' + c.getName() + '  →  ' + c.getId(); });
   Logger.log('CODE SECRET à copier dans la tablette : ' + tok);
+  Logger.log('(Il est aussi visible dans Paramètres du projet > Propriétés du script > TOKEN)');
+  var cals = CalendarApp.getAllCalendars().map(function (c) { return '  ' + c.getName() + '  →  ' + c.getId(); });
   Logger.log('Agendas trouvés :\n' + cals.join('\n'));
 }
 

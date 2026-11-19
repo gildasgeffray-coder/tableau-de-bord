@@ -37,7 +37,10 @@ Fais ces étapes sur un ordinateur, c'est plus confortable que sur la tablette.
       Clique sur **Paramètres avancés**, puis sur **Accéder à Moteur tableau de bord (non sécurisé)**.
    3. Clique sur **Autoriser**.
 4. En bas, le **Journal d'exécution** affiche une ligne `CODE SECRET à copier dans la tablette : ...`.
-   **Note ce code**, tu en auras besoin à l'étape 6.
+   **Note ce code**, tu en auras besoin à l'étape 7.
+   Tu ne le vois pas ? Va dans la **roue dentée** (Paramètres du projet), puis **Propriétés du script** :
+   la valeur de la ligne `TOKEN` est ton code secret.
+   S'il n'y a pas de ligne `TOKEN`, relance `setup` et va jusqu'au bout de l'autorisation.
 
 ## 5. Vérifier que tout marche
 
