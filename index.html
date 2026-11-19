@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#060b1a">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Tableau de bord</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main class="grid" id="app">
+
+  <section class="card c-clock" id="w-clock">
+    <div class="time"><span id="clk-h">--</span><span class="colon">:</span><span id="clk-m">--</span><span class="sec" id="clk-s">--</span></div>
+    <div class="dayname" id="clk-day"></div>
+    <div class="fulldate" id="clk-date"></div>
+  </section>
+
+  <section class="card c-weather" id="w-weather">
+    <header class="card-h"><span class="bar"></span>Météo <small id="wx-place"></small><small class="upd" id="wx-upd"></small></header>
+    <div class="wx-body" id="wx-body"><div class="loading">Chargement…</div></div>
+  </section>
+
+  <section class="card c-sport" id="w-sport">
+    <header class="card-h"><span class="bar"></span>Sport du jour <small class="upd" id="sp-score"></small></header>
+    <div id="sp-body"></div>
+  </section>
+
+  <section class="card c-agenda" id="w-agenda">
+    <header class="card-h"><span class="bar blue"></span>Agenda <small class="upd" id="ag-upd"></small>
+      <button class="btn-round" id="ag-add" aria-label="Ajouter un événement">+</button></header>
+    <div id="ag-alert"></div>
+    <div class="ag-scroll" id="ag-body"><div class="loading">Chargement…</div></div>
+  </section>
+
+  <section class="card c-cal" id="w-cal">
+    <div class="cal-head">
+      <button class="btn-ghost" id="cal-prev" aria-label="Mois précédent">&#8249;</button>
+      <span id="cal-title"></span>
+      <button class="btn-ghost" id="cal-next" aria-label="Mois suivant">&#8250;</button>
+    </div>
+    <div class="cal-grid" id="cal-grid"></div>
+  </section>
+
+  <section class="card c-news" id="w-news">
+    <header class="card-h"><span class="bar blue"></span>Actualités <small class="upd" id="nw-upd"></small></header>
+    <div id="nw-body"><div class="loading">Chargement…</div></div>
+  </section>
+
+  <section class="card c-horo" id="w-horo">
+    <header class="card-h"><span class="bar"></span>Horoscope <small class="upd" id="hr-dots"></small></header>
+    <div id="hr-body"><div class="loading">Chargement…</div></div>
+  </section>
+
+</main>
+
+<div class="toolbar">
+  <span class="status" id="status" title="État de la connexion"></span>
+  <button class="btn-ghost small" id="btn-fs" aria-label="Plein écran">&#x26F6;</button>
+  <button class="btn-ghost small" id="btn-settings" aria-label="Réglages">&#9881;&#xFE0E;</button>
+</div>
+
+<div class="night" id="night"></div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-box" id="modal-box"></div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/util.js"></script>
+<script src="js/api.js"></script>
+<script src="js/clock.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/agenda.js"></script>
+<script src="js/news.js"></script>
+<script src="js/horoscope.js"></script>
+<script src="js/sport.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
