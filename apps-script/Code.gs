@@ -78,6 +78,7 @@ function testCozytouch() {
 
 /** À lancer depuis l'éditeur pour vérifier l'horoscope. */
 function testHoroscope() {
+  CacheService.getScriptCache().removeAll(['lion', 'sagittaire', 'vierge'].map(function (s) { return 'horo2_' + ymd_(new Date()) + '_' + s; }));
   Logger.log(JSON.stringify(getHoroscope_(['lion', 'sagittaire', 'vierge']), null, 2));
 }
 
@@ -172,8 +173,11 @@ function deleteEvent_(d) {
 }
 
 /* ======================= Horoscope ======================= */
-/* Source : flux RSS de mon-horoscope-du-jour.com, un flux par signe.
-   Le flux mêle quotidien, hebdomadaire et trimestriel : on garde le quotidien le plus récent. */
+/* Source : mon-horoscope-du-jour.com.
+   Texte complet lu sur la page du jour de chaque signe ; si la page change de forme,
+   on se rabat sur le flux RSS (extrait plus court). */
+
+var HORO_SITE = 'https://www.mon-horoscope-du-jour.com';
 
 function getHoroscope_(signs) {
   var cache = CacheService.getScriptCache();
@@ -183,23 +187,44 @@ function getHoroscope_(signs) {
   signs.forEach(function (s) {
     s = String(s).trim().toLowerCase();
     if (!/^[a-z]+$/.test(s)) return;
-    var hit = cache.get('horo_' + today + '_' + s);
+    var hit = cache.get('horo2_' + today + '_' + s);
     if (hit) result.signs[s] = JSON.parse(hit); else todo.push(s);
   });
-  if (todo.length) {
-    var reqs = todo.map(function (s) {
-      return { url: 'https://www.mon-horoscope-du-jour.com/rss/rss_' + s + '.php', muteHttpExceptions: true };
-    });
-    var resps = UrlFetchApp.fetchAll(reqs);
-    todo.forEach(function (s, i) {
-      if (resps[i].getResponseCode() !== 200) return;
-      var item = latestDaily_(resps[i].getContentText('UTF-8'));
-      if (!item) return;
-      result.signs[s] = item;
-      cache.put('horo_' + today + '_' + s, JSON.stringify(item), 6 * 3600);
+  if (!todo.length) return result;
+
+  var pages = UrlFetchApp.fetchAll(todo.map(function (s) {
+    return { url: HORO_SITE + '/horoscopes/quotidien/' + s + '.htm', muteHttpExceptions: true };
+  }));
+  var missing = [];
+  todo.forEach(function (s, i) {
+    var text = pages[i].getResponseCode() === 200 ? pageText_(pages[i].getContentText('UTF-8')) : '';
+    if (text) store_(s, { date: Date.now(), text: text }); else missing.push(s);
+  });
+
+  if (missing.length) {
+    var feeds = UrlFetchApp.fetchAll(missing.map(function (s) {
+      return { url: HORO_SITE + '/rss/rss_' + s + '.php', muteHttpExceptions: true };
+    }));
+    missing.forEach(function (s, i) {
+      if (feeds[i].getResponseCode() !== 200) return;
+      var item = latestDaily_(feeds[i].getContentText('UTF-8'));
+      if (item) store_(s, item);
     });
   }
   return result;
+
+  function store_(s, item) {
+    result.signs[s] = item;
+    cache.put('horo2_' + today + '_' + s, JSON.stringify(item), 2 * 3600);
+  }
+}
+
+/* Texte du jour : paragraphe <p class="content-intro"> de la page quotidienne */
+function pageText_(html) {
+  var m = html.match(/<p class="content-intro">([\s\S]*?)<\/p>/);
+  if (!m) return '';
+  var t = decode_(m[1].replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
+  return t.length > 40 ? t : '';
 }
 
 function latestDaily_(xml) {
