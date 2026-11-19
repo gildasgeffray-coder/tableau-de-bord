@@ -104,15 +104,16 @@ var Weather = (function () {
   function indoorHtml() {
     var head = '<span class="wx-in-icon">' + HOUSE + '</span><div><div class="wx-label">Intérieur</div>';
     if (!indoor || indoor.temp == null) {
-      var msg = API.isLive() ? "Cozytouch non relié" : "Démo";
-      return head + '<div class="wx-deg">–</div><div class="wx-sub">' + msg + "</div></div>";
+      var msg = !API.isLive() ? "Démo" : (indoor && indoor.error ? indoor.error : "Cozytouch non relié");
+      return head + '<div class="wx-deg">–</div><div class="wx-sub" title="' + U.esc(msg) + '">' + U.esc(msg) + "</div></div>";
     }
-    var sub = indoor.name ? U.esc(indoor.name) : "";
-    if (indoor.target != null) sub += (sub ? " · " : "") + "consigne <b>" + r1(indoor.target) + "°</b>";
+    var sub;
     if (indoor.demo) sub = "exemple";
+    else if (indoor.count > 1) sub = "moyenne maison</div><div class=\"wx-sub\"><b>" + r1(indoor.min) + "°</b> à <b>" + r1(indoor.max) + "°</b>";
+    else sub = U.esc(indoor.rooms && indoor.rooms[0] ? indoor.rooms[0].name : "Cozytouch");
     var stale = indoor.at && (Date.now() - indoor.at > 3 * 3600000);
     return head + '<div class="wx-deg">' + r1(indoor.temp) + "<sup>°C</sup></div>" +
-      '<div class="wx-sub">' + sub + (stale ? " · <b>ancienne mesure</b>" : "") + "</div></div>";
+      '<div class="wx-sub">' + (stale ? "<b>ancienne mesure</b>" : sub) + "</div></div>";
   }
 
   function fetchWeather() {
@@ -136,8 +137,8 @@ var Weather = (function () {
       render(); return;
     }
     API.get("indoor").then(function (d) {
-      indoor = d && d.temp != null ? { temp: d.temp, target: d.target, name: d.name, at: d.at || Date.now() } : null;
-      U.save(CACHE_IN, indoor);
+      if (d && d.temp != null) { indoor = d; U.save(CACHE_IN, indoor); }
+      else if (!indoor || indoor.temp == null) indoor = d; /* sinon on garde la dernière mesure, marquée ancienne */
       Status.set("intérieur", null);
       render();
     }).catch(function (e) { Status.set("intérieur", e); render(); });

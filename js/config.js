@@ -10,6 +10,6 @@ var CONFIG = {
     meteo: 15,
     agenda: 5,
     horoscope: 180,
-    interieur: 5
+    interieur: 15
   }
 };
