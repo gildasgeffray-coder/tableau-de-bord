@@ -79,10 +79,10 @@ var Weather = (function () {
       "</div>";
 
     html += '<div class="wx-facts">' +
-      "<span>Auj. <b>" + r(dl.temperature_2m_min[0]) + "° / " + r(dl.temperature_2m_max[0]) + "°</b></span>" +
-      "<span>Vent <b>" + r(c.wind_speed_10m) + " km/h</b> " + windDir(c.wind_direction_10m) + "</span>" +
-      "<span>Rafales <b>" + r(c.wind_gusts_10m) + "</b></span>" +
-      "<span>Pluie <b>" + (dl.precipitation_probability_max[0] == null ? "–" : dl.precipitation_probability_max[0] + " %") + "</b> · " + r1(dl.precipitation_sum[0]) + " mm</span>" +
+      "<span>Min / max <b>" + r(dl.temperature_2m_min[0]) + "° / " + r(dl.temperature_2m_max[0]) + "°</b></span>" +
+      "<span>Vent <b>" + r(c.wind_speed_10m) + " km/h " + windDir(c.wind_direction_10m) + "</b></span>" +
+      "<span>Rafales <b>" + r(c.wind_gusts_10m) + " km/h</b></span>" +
+      "<span>Pluie <b>" + (dl.precipitation_probability_max[0] == null ? "–" : dl.precipitation_probability_max[0] + " %") + " · " + mm(dl.precipitation_sum[0]) + "</b></span>" +
       "<span>Humidité <b>" + r(c.relative_humidity_2m) + " %</b></span>" +
       "</div>";
 
@@ -94,7 +94,7 @@ var Weather = (function () {
         icon(dl.weather_code[i], 1) +
         '<div class="t">' + r(dl.temperature_2m_max[i]) + '°<span class="min">' + r(dl.temperature_2m_min[i]) + "°</span></div>" +
         '<div class="r rain">' + (p == null ? "" : p + " % · ") + mm(dl.precipitation_sum[i]) + "</div>" +
-        '<div class="r">vent ' + r(dl.wind_speed_10m_max[i]) + " km/h</div></div>";
+        '<div class="r">' + r(dl.wind_speed_10m_max[i]) + " km/h</div></div>";
     }
     html += "</div>";
     body.innerHTML = html;

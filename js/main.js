@@ -4,9 +4,7 @@
   Clock.start();
   Weather.start();
   Agenda.start();
-  News.start();
   Horoscope.start();
-  Sport.start();
 
   U.$("btn-settings").onclick = Settings.open;
 
@@ -50,7 +48,7 @@
   }, 5 * 60000);
 
   /* Retour de connexion : on rafraîchit tout */
-  window.addEventListener("online", function () { Weather.refresh(); Agenda.refresh(); News.refresh(); Horoscope.refresh(); });
+  window.addEventListener("online", function () { Weather.refresh(); Agenda.refresh(); Horoscope.refresh(); });
 
   if ("serviceWorker" in navigator && location.protocol === "https:") {
     navigator.serviceWorker.register("sw.js").catch(function () { });

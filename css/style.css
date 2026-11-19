@@ -39,19 +39,17 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   display: grid;
   padding: 0.9rem;
   grid-gap: 0.9rem;
-  grid-template-columns: 1.08fr 1fr 1fr;
-  grid-template-rows: 0.74fr 1.3fr 0.98fr;
+  grid-template-columns: 1.1fr 1fr 1fr;
+  grid-template-rows: 0.8fr 0.95fr 1fr;
   grid-template-areas:
-    "clock   agenda news"
-    "weather agenda news"
-    "sport   cal    horo";
+    "clock   agenda cal"
+    "weather agenda cal"
+    "weather agenda horo";
 }
 .c-clock { grid-area: clock; }
 .c-weather { grid-area: weather; }
-.c-sport { grid-area: sport; }
 .c-agenda { grid-area: agenda; }
 .c-cal { grid-area: cal; }
-.c-news { grid-area: news; }
 .c-horo { grid-area: horo; }
 
 .card {
@@ -93,25 +91,25 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .wx-now { display: flex; align-items: center; flex: none; }
 .wx-temp { flex: 1; display: flex; align-items: center; min-width: 0; }
 .wx-temp + .wx-temp { border-left: 1px solid var(--line); padding-left: 1rem; margin-left: 0.8rem; }
-.wx-temp > svg { width: 3.8rem; height: 3.8rem; flex: none; margin-right: 0.5rem; }
-.wx-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
-.wx-deg { font-size: 2.9rem; font-weight: 300; line-height: 1.05; white-space: nowrap; }
-.wx-deg sup { font-size: 1.1rem; color: var(--muted); margin-left: 0.1rem; }
-.wx-sub { font-size: 0.85rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.wx-temp > svg { width: 4.6rem; height: 4.6rem; flex: none; margin-right: 0.5rem; }
+.wx-label { font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.wx-deg { font-size: 3.4rem; font-weight: 300; line-height: 1.05; white-space: nowrap; }
+.wx-deg sup { font-size: 1.4rem; color: var(--muted); margin-left: 0.1rem; }
+.wx-sub { font-size: 0.98rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .wx-sub b { color: var(--text); font-weight: 500; }
-.wx-in-icon { width: 2.8rem; height: 2.8rem; flex: none; margin-right: 0.6rem; color: var(--green); }
+.wx-in-icon { width: 3rem; height: 3rem; flex: none; margin-right: 0.6rem; color: var(--green); }
 .wx-in-icon svg { width: 100%; height: 100%; }
-.wx-facts { display: flex; flex-wrap: wrap; font-size: 0.88rem; color: var(--muted); margin: 0.5rem 0; flex: none; }
-.wx-facts span { margin-right: 1rem; white-space: nowrap; line-height: 1.5; }
+.wx-facts { display: flex; flex-wrap: wrap; font-size: 1.05rem; color: var(--muted); margin: 0.8rem 0; padding: 0.6rem 0.2rem; border-top: 1px solid var(--line); flex: none; }
+.wx-facts span { width: 50%; white-space: nowrap; line-height: 1.9; }
 .wx-facts b { color: var(--text); font-weight: 500; }
-.wx-days { display: flex; border-top: 1px solid var(--line); padding-top: 0.5rem; flex: none; }
+.wx-days { display: flex; border-top: 1px solid var(--line); padding-top: 0.8rem; flex: none; }
 .wx-day { flex: 1; text-align: center; min-width: 0; }
 .wx-day + .wx-day { border-left: 1px solid var(--line); }
-.wx-day .d { font-size: 0.85rem; color: var(--muted); text-transform: capitalize; }
-.wx-day svg { width: 2.2rem; height: 2.2rem; display: block; margin: 0.1rem auto; }
-.wx-day .t { font-size: 1.05rem; }
+.wx-day .d { font-size: 1rem; color: var(--muted); text-transform: capitalize; }
+.wx-day svg { width: 3.2rem; height: 3.2rem; display: block; margin: 0.3rem auto; }
+.wx-day .t { font-size: 1.35rem; margin-bottom: 0.2rem; }
 .wx-day .t .min { color: var(--blue); margin-left: 0.3rem; }
-.wx-day .r { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
+.wx-day .r { font-size: 0.78rem; line-height: 1.5; color: var(--muted); white-space: nowrap; }
 .wx-day .r.rain { color: var(--blue); }
 
 /* ---------- Agenda ---------- */
@@ -166,48 +164,18 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .cal-day .dot.bd { background: #ff8fc8; }
 .cal-day.today .dot { background: #04261a; }
 
-/* ---------- Actualités ---------- */
-#nw-body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-.nw {
-  flex: 1; min-height: 0; overflow: hidden; padding: 0.45rem 0; border-bottom: 1px solid var(--line);
-  display: flex; flex-direction: column; justify-content: center;
-}
-.nw:last-child { border-bottom: 0; }
-.nw .src { font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--blue); }
-.nw .src span { color: var(--dim); margin-left: 0.4rem; letter-spacing: 0.02em; text-transform: none; }
-.nw .ttl { font-size: 1.06rem; font-weight: 500; line-height: 1.25; margin-top: 0.1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.nw .sum { font-size: 0.86rem; color: var(--muted); line-height: 1.3; margin-top: 0.15rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
 /* ---------- Horoscope ---------- */
 #hr-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .hr-sign { display: flex; align-items: baseline; }
 .hr-glyph { font-size: 1.9rem; color: var(--green); margin-right: 0.5rem; line-height: 1; }
 .hr-name { font-size: 1.3rem; font-weight: 500; }
 .hr-name small { font-size: 0.8rem; color: var(--dim); margin-left: 0.5rem; font-weight: 400; }
-.hr-text { font-size: 0.98rem; line-height: 1.4; color: #cfd9f5; margin-top: 0.4rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 6; -webkit-box-orient: vertical; }
+.hr-text { font-size: 1.08rem; line-height: 1.45; color: #cfd9f5; margin-top: 0.4rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 9; -webkit-box-orient: vertical; }
 .hr-src { font-size: 0.7rem; color: var(--dim); margin-top: auto; padding-top: 0.3rem; }
 .hr-dot { display: inline-block; width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--dim); margin-left: 0.3rem; }
 .hr-dot.on { background: var(--green); }
 .fade { animation: fade 0.5s ease; }
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-
-/* ---------- Sport ---------- */
-#sp-body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
-.sp-goals { flex: 1; min-height: 0; overflow-y: auto; }
-.goal { display: flex; align-items: center; width: 100%; text-align: left; padding: 0.35rem 0; font-size: 1.08rem; }
-.goal .box {
-  width: 1.7rem; height: 1.7rem; flex: none; border-radius: 0.5rem; margin-right: 0.7rem;
-  border: 2px solid var(--dim); display: flex; align-items: center; justify-content: center; color: #04261a; font-weight: 700;
-}
-.goal.done .box { background: var(--green); border-color: var(--green); }
-.goal.done .lbl { color: var(--muted); text-decoration: line-through; }
-.sp-foot { display: flex; align-items: flex-end; flex: none; padding-top: 0.4rem; border-top: 1px solid var(--line); }
-.sp-week { display: flex; align-items: flex-end; height: 2.2rem; margin-right: 1rem; flex: none; }
-.sp-bar { width: 0.55rem; margin-right: 0.22rem; border-radius: 0.2rem; background: rgba(255,255,255,0.08); position: relative; height: 100%; }
-.sp-bar i { position: absolute; left: 0; right: 0; bottom: 0; border-radius: 0.2rem; background: var(--green); }
-.sp-bar.today i { background: var(--blue); }
-.sp-quote { font-size: 0.86rem; font-style: italic; color: var(--muted); line-height: 1.3; }
-.sp-quote small { font-style: normal; color: var(--dim); }
 
 /* ---------- Barre d'outils, nuit, statut ---------- */
 .toolbar { position: fixed; right: 0.9rem; bottom: 0.9rem; display: flex; align-items: center; opacity: 0.55; }
@@ -266,12 +234,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       "clock   clock"
       "weather weather"
       "agenda  cal"
-      "news    news"
-      "sport   horo";
+      "horo    horo";
   }
   .c-clock { min-height: 12rem; }
   .c-agenda { max-height: 26rem; }
 }
 @media (max-width: 560px) {
-  .grid { grid-template-columns: 1fr; grid-template-areas: "clock" "weather" "agenda" "cal" "news" "sport" "horo"; }
+  .grid { grid-template-columns: 1fr; grid-template-areas: "clock" "weather" "agenda" "cal" "horo"; }
 }
