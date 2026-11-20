@@ -8,13 +8,20 @@
  *   COZYTOUCH_USER      e-mail du compte Cozytouch
  *   COZYTOUCH_PASSWORD  mot de passe Cozytouch
  *   CALENDARS           (facultatif) identifiants d'agendas séparés par des virgules
+ *   SPOTIFY_CLIENT_ID   identifiant de l'application Spotify (developer.spotify.com)
+ *   SPOTIFY_CLIENT_SECRET  secret de l'application Spotify
  */
 
 var TZ = 'Europe/Paris';
 
 /* ======================= Point d'entrée ======================= */
 
-function doGet(e) { return handle_(e && e.parameter ? e.parameter : {}); }
+function doGet(e) {
+  var p = e && e.parameter ? e.parameter : {};
+  /* Pages HTML pour relier Spotify (ouvertes dans un navigateur, pas par la tablette) */
+  if (p.action === 'spotifyLogin' || (p.code && p.state) || (p.error && p.state)) return spotifyPages_(p);
+  return handle_(p);
+}
 
 function doPost(e) {
   var p = {};
@@ -35,6 +42,8 @@ function handle_(p) {
       case 'horoscope': out = getHoroscope_(String(p.signs || '').split(',')); break;
       case 'indoor': out = getIndoor_(); break;
       case 'quote': out = getQuote_(); break;
+      case 'spotifyState': out = spotifyState_(); break;
+      case 'spotifyControl': out = spotifyControl_(p.data || {}); break;
       default: throw new Error('Action inconnue : ' + p.action);
     }
     return json_({ ok: true, data: out });
@@ -300,6 +309,138 @@ function parseQuote_(html) {
   var text = t ? clean(t[1]) : '';
   if (text.length < 5) return null;
   return { text: text, author: au ? clean(au[1]) : '', date: d ? d[1] : '' };
+}
+
+/* ======================= Spotify ======================= */
+/* Affiche la lecture en cours et sert de télécommande (Spotify Premium obligatoire).
+   La musique sort de l'appareil où Spotify joue : tablette, téléphone, enceinte...
+   Liaison une seule fois : ouvrir dans un navigateur  <adresse /exec>?action=spotifyLogin&token=<code secret> */
+
+var SPOTIFY_SCOPES = 'user-read-playback-state user-modify-playback-state user-read-currently-playing';
+
+function spotifyRedirect_() {
+  return PropertiesService.getScriptProperties().getProperty('SPOTIFY_REDIRECT') || ScriptApp.getService().getUrl();
+}
+
+function html_(title, body) {
+  return HtmlService.createHtmlOutput(
+    '<div style="font-family:Arial,sans-serif;max-width:640px;margin:40px auto;line-height:1.5;font-size:16px">' +
+    '<h2>' + title + '</h2>' + body + '</div>').setTitle(title);
+}
+function escHtml_(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+
+function spotifyPages_(p) {
+  var props = PropertiesService.getScriptProperties();
+  var tok = props.getProperty('TOKEN');
+  var redirect = spotifyRedirect_();
+  try {
+    if (p.action === 'spotifyLogin') {
+      if (!tok || p.token !== tok) return html_('Accès refusé', '<p>Code secret incorrect dans l\'adresse.</p>');
+      var id = props.getProperty('SPOTIFY_CLIENT_ID');
+      if (!id || !props.getProperty('SPOTIFY_CLIENT_SECRET')) {
+        return html_('Spotify : réglages manquants', '<p>Ajoute SPOTIFY_CLIENT_ID et SPOTIFY_CLIENT_SECRET dans les propriétés du script.</p>');
+      }
+      var url = 'https://accounts.spotify.com/authorize?response_type=code&client_id=' + encodeURIComponent(id) +
+        '&scope=' + encodeURIComponent(SPOTIFY_SCOPES) + '&redirect_uri=' + encodeURIComponent(redirect) +
+        '&state=' + encodeURIComponent(tok) + '&show_dialog=true';
+      return html_('Relier Spotify',
+        '<p>1. Vérifie que cette adresse figure <b>exactement</b> dans les « Redirect URIs » de ton application Spotify :</p>' +
+        '<p style="background:#eee;padding:10px;word-break:break-all"><code>' + escHtml_(redirect) + '</code></p>' +
+        '<p>2. Puis clique ici : <a href="' + escHtml_(url) + '" target="_top" style="font-size:20px">Se connecter à Spotify</a></p>');
+    }
+    if (!tok || p.state !== tok) return html_('Accès refusé', '<p>Retour Spotify non reconnu.</p>');
+    if (p.error) return html_('Spotify refusé', '<p>Spotify a répondu : ' + escHtml_(p.error) + '</p>');
+    var t = spotifyTokenRequest_({ grant_type: 'authorization_code', code: p.code, redirect_uri: redirect });
+    if (!t.refresh_token) throw new Error('Pas de jeton de rafraîchissement reçu');
+    props.setProperty('SPOTIFY_REFRESH', t.refresh_token);
+    CacheService.getScriptCache().put('sp_access', t.access_token, 3000);
+    return html_('Spotify est relié ✓', '<p>Tu peux fermer cette page. Le tableau affichera la lecture en cours d\'ici quelques secondes.</p>');
+  } catch (err) {
+    return html_('Erreur Spotify', '<p>' + escHtml_(err.message || err) + '</p>');
+  }
+}
+
+function spotifyTokenRequest_(payload) {
+  var props = PropertiesService.getScriptProperties();
+  var basic = Utilities.base64Encode(props.getProperty('SPOTIFY_CLIENT_ID') + ':' + props.getProperty('SPOTIFY_CLIENT_SECRET'));
+  var res = UrlFetchApp.fetch('https://accounts.spotify.com/api/token', {
+    method: 'post', payload: payload, headers: { Authorization: 'Basic ' + basic }, muteHttpExceptions: true
+  });
+  var j = {};
+  try { j = JSON.parse(res.getContentText()); } catch (e) { }
+  if (res.getResponseCode() !== 200) throw new Error('Spotify ' + res.getResponseCode() + ' : ' + (j.error_description || j.error || res.getContentText().slice(0, 150)));
+  return j;
+}
+
+function spotifyAccess_() {
+  var cache = CacheService.getScriptCache();
+  var a = cache.get('sp_access');
+  if (a) return a;
+  var props = PropertiesService.getScriptProperties();
+  var refresh = props.getProperty('SPOTIFY_REFRESH');
+  if (!refresh) return null;
+  var t = spotifyTokenRequest_({ grant_type: 'refresh_token', refresh_token: refresh });
+  if (t.refresh_token) props.setProperty('SPOTIFY_REFRESH', t.refresh_token);
+  cache.put('sp_access', t.access_token, Math.max(60, (t.expires_in || 3600) - 300));
+  return t.access_token;
+}
+
+function spotifyApi_(method, path, body) {
+  var access = spotifyAccess_();
+  if (!access) throw new Error('Spotify non relié');
+  var opts = { method: method, headers: { Authorization: 'Bearer ' + access }, muteHttpExceptions: true };
+  /* Spotify exige un corps (même vide) pour les commandes PUT/POST */
+  if (method !== 'get') { opts.contentType = 'application/json'; opts.payload = JSON.stringify(body || {}); }
+  var res = UrlFetchApp.fetch('https://api.spotify.com/v1' + path, opts);
+  var code = res.getResponseCode();
+  if (code === 401) { CacheService.getScriptCache().remove('sp_access'); throw new Error('Session Spotify expirée, nouvel essai au prochain rafraîchissement'); }
+  if (code === 204 || code === 202) return null;
+  var txt = res.getContentText();
+  var j = null;
+  try { j = txt ? JSON.parse(txt) : null; } catch (e) { }
+  if (code >= 300) {
+    var msg = j && j.error ? (j.error.message || j.error) : txt.slice(0, 150);
+    if (/NO_ACTIVE_DEVICE|No active device/i.test(msg)) msg = 'Aucun appareil Spotify actif';
+    if (code === 403 && /premium/i.test(msg)) msg = 'Spotify Premium nécessaire';
+    throw new Error(msg);
+  }
+  return j;
+}
+
+function spotifyState_() {
+  if (!PropertiesService.getScriptProperties().getProperty('SPOTIFY_REFRESH')) return { linked: false };
+  var st = spotifyApi_('get', '/me/player?additional_types=episode');
+  if (!st || !st.item) {
+    var dev = spotifyApi_('get', '/me/player/devices') || { devices: [] };
+    return { linked: true, active: false, devices: (dev.devices || []).map(function (d) { return { id: d.id, name: d.name, type: d.type }; }) };
+  }
+  var it = st.item, isEp = it.type === 'episode';
+  var imgs = isEp ? (it.images || (it.show && it.show.images) || []) : ((it.album && it.album.images) || []);
+  var img = imgs.length ? imgs.reduce(function (best, x) { return (x.width >= 200 && (!best || x.width < best.width)) ? x : best; }, null) || imgs[0] : null;
+  return {
+    linked: true, active: true, playing: !!st.is_playing,
+    title: it.name,
+    artist: isEp ? (it.show ? it.show.name : '') : (it.artists || []).map(function (a) { return a.name; }).join(', '),
+    image: img ? img.url : '',
+    progress: st.progress_ms || 0, duration: it.duration_ms || 0,
+    shuffle: !!st.shuffle_state,
+    device: st.device ? { id: st.device.id, name: st.device.name, type: st.device.type, volume: st.device.volume_percent } : null,
+    at: Date.now()
+  };
+}
+
+function spotifyControl_(d) {
+  var dev = d.deviceId ? '?device_id=' + encodeURIComponent(d.deviceId) : '';
+  switch (d.cmd) {
+    case 'play': spotifyApi_('put', '/me/player/play' + dev); break;
+    case 'pause': spotifyApi_('put', '/me/player/pause'); break;
+    case 'next': spotifyApi_('post', '/me/player/next'); break;
+    case 'previous': spotifyApi_('post', '/me/player/previous'); break;
+    case 'volume': spotifyApi_('put', '/me/player/volume?volume_percent=' + Math.max(0, Math.min(100, Math.round(+d.value || 0)))); break;
+    case 'transfer': spotifyApi_('put', '/me/player', { device_ids: [d.deviceId], play: true }); break;
+    default: throw new Error('Commande Spotify inconnue');
+  }
+  return { ok: true };
 }
 
 /* ======================= Cozytouch (radiateurs Atlantic) ======================= */

@@ -80,3 +80,39 @@ Quand le code du moteur change :
 3. Clique sur le **crayon**, choisis **Version : Nouvelle version**, puis **Déployer**.
 
 L'adresse `/exec` reste la même : rien à changer sur la tablette.
+
+## Spotify (facultatif, Spotify Premium obligatoire)
+
+Le tableau affiche la musique en cours et sert de télécommande : lecture, pause, morceau suivant ou précédent, volume.
+La musique sort de l'appareil où Spotify joue : tablette, téléphone, enceinte.
+Fais ces étapes sur un ordinateur, après avoir mis à jour le moteur avec la dernière version du code.
+
+### 1. Créer l'application Spotify (5 minutes)
+
+1. Ouvre https://developer.spotify.com/dashboard et connecte-toi avec ton compte Spotify Premium.
+   Accepte les conditions si elles s'affichent.
+2. Clique sur **Create app** et remplis :
+   1. App name : `Tableau de bord`
+   2. App description : `Tableau de bord personnel`
+   3. Redirect URIs : colle l'**URL de ton moteur** (celle qui se termine par `/exec`), puis clique sur **Add**.
+   4. Coche **Web API**.
+   5. Coche l'acceptation des conditions, puis **Save**.
+3. Sur la page de l'application, clique sur **Settings**.
+   Note le **Client ID**, puis clique sur **View client secret** et note le **Client secret**.
+
+### 2. Donner ces deux codes au moteur
+
+1. Dans Apps Script, clique sur la **roue dentée**, puis **Propriétés du script**.
+2. Ajoute deux propriétés :
+   1. `SPOTIFY_CLIENT_ID` : le Client ID.
+   2. `SPOTIFY_CLIENT_SECRET` : le Client secret.
+3. Clique sur **Enregistrer les propriétés du script**.
+
+### 3. Relier ton compte Spotify (une seule fois)
+
+1. Dans ton navigateur, ouvre l'adresse de ton moteur en ajoutant à la fin `?action=spotifyLogin&token=` suivi de ton code secret.
+   Exemple : `https://script.google.com/macros/s/AKfy…/exec?action=spotifyLogin&token=8d49…`
+2. La page affiche une adresse dans un cadre gris. Vérifie qu'elle est **exactement** celle que tu as mise dans les Redirect URIs de Spotify.
+   Si elle est différente, ajoute dans les Propriétés du script `SPOTIFY_REDIRECT` avec l'adresse que tu as mise chez Spotify, puis recharge la page.
+3. Clique sur **Se connecter à Spotify**, puis accepte.
+4. La page « Spotify est relié ✓ » s'affiche. Sur la tablette, le bloc Spotify montre la musique en cours en moins d'une minute.

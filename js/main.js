@@ -6,6 +6,7 @@
   Agenda.start();
   Horoscope.start();
   Quote.start();
+  Spotify.start();
 
   U.$("btn-settings").onclick = Settings.open;
 
