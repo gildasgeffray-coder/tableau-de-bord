@@ -54,7 +54,7 @@ var Spotify = (function () {
         (st.image ? '<img class="sp-cover" src="' + U.esc(st.image) + '" alt="">' : '<div class="sp-cover sp-nocover">' + ICON.note + "</div>") +
         '<div class="sp-info"><div class="sp-title">' + U.esc(st.title) + "</div>" +
         '<div class="sp-artist">' + U.esc(st.artist) + "</div>" +
-        '<div class="sp-device">' + (st.device ? "sur " + U.esc(st.device.name) : "") + (vol != null ? " · volume " + vol + " %" : "") + "</div></div>" +
+        '<button class="sp-device" data-cmd="devices">' + (st.device ? "sur " + U.esc(st.device.name) : "choisir l'appareil") + (vol != null ? " · volume " + vol + " %" : "") + " &#9662;</button></div>" +
       "</div>" +
       '<div class="sp-bar"><span id="sp-pos">' + mmss(pos()) + '</span><div class="sp-track"><i id="sp-fill" style="width:' + (st.duration ? pos() / st.duration * 100 : 0) + '%"></i></div><span>' + mmss(st.duration) + "</span></div>" +
       '<div class="sp-ctrl">' +
@@ -104,6 +104,31 @@ var Spotify = (function () {
     });
   }
 
+  /* Liste des appareils Spotify disponibles, pour y envoyer la musique */
+  function openDevices() {
+    Modal.open('<h2>Écouter sur…</h2><div id="sp-devlist"><div class="loading">Recherche des appareils…</div></div>' +
+      '<p class="note">Un appareil n\'apparaît que si Spotify y est ouvert (téléphone, ordinateur, tablette) ou s\'il est compatible Spotify Connect (enceintes connectées, TV).</p>' +
+      '<div class="actions"><button class="btn-second" data-close>Fermer</button></div>');
+    API.get("spotifyDevices").then(function (list) {
+      var box = U.$("sp-devlist");
+      if (!box) return;
+      if (!list || !list.length) { box.innerHTML = '<div class="empty">Aucun appareil disponible pour le moment.</div>'; return; }
+      box.innerHTML = list.map(function (d) {
+        return '<button class="sp-dev' + (d.active ? " on" : "") + '" data-dev="' + U.esc(d.id) + '">' + ICON.play + U.esc(d.name) +
+          (d.active ? " · en cours" : "") + "</button>";
+      }).join("");
+      box.onclick = function (ev) {
+        var b = ev.target.closest ? ev.target.closest("[data-dev]") : null;
+        if (!b) return;
+        Modal.close();
+        send("transfer", { deviceId: b.getAttribute("data-dev") });
+      };
+    }).catch(function (e) {
+      var box = U.$("sp-devlist");
+      if (box) box.innerHTML = '<div class="note err">' + U.esc(e.message || e) + "</div>";
+    });
+  }
+
   function onClick(e) {
     var b = e.target.closest ? e.target.closest("button") : null;
     if (!b || !st) return;
@@ -111,6 +136,7 @@ var Spotify = (function () {
     if (dev) { send("transfer", { deviceId: dev }); return; }
     var cmd = b.getAttribute("data-cmd");
     if (!cmd) return;
+    if (cmd === "devices") { openDevices(); return; }
     if (cmd === "pause" || cmd === "play") {
       /* réaction immédiate à l'écran, confirmée ensuite par Spotify */
       st.progress = pos(); st.at = Date.now(); st.playing = cmd === "play"; render();

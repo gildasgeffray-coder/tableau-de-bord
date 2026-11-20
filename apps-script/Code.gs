@@ -44,6 +44,7 @@ function handle_(p) {
       case 'quote': out = getQuote_(); break;
       case 'spotifyState': out = spotifyState_(); break;
       case 'spotifyControl': out = spotifyControl_(p.data || {}); break;
+      case 'spotifyDevices': out = spotifyDevices_(); break;
       default: throw new Error('Action inconnue : ' + p.action);
     }
     return json_({ ok: true, data: out });
@@ -432,6 +433,11 @@ function spotifyState_() {
     device: st.device ? { id: st.device.id, name: st.device.name, type: st.device.type, volume: st.device.volume_percent } : null,
     at: Date.now()
   };
+}
+
+function spotifyDevices_() {
+  var dev = spotifyApi_('get', '/me/player/devices') || { devices: [] };
+  return (dev.devices || []).map(function (d) { return { id: d.id, name: d.name, type: d.type, active: !!d.is_active }; });
 }
 
 function spotifyControl_(d) {
