@@ -43,6 +43,8 @@ var Settings = (function () {
       /* Nettoie les copier-coller : espaces, retours à la ligne, caractères invisibles */
       var clean = function (v) { return v.replace(/[\s​-‍﻿ ]+/g, ""); };
       var url = clean(U.$("s-url").value), token = clean(U.$("s-token").value);
+      /* ID de déploiement collé seul (AKfy…) : on reconstruit l'adresse complète */
+      if (/^AKfy[\w-]{20,}$/.test(url)) url = "https://script.google.com/macros/s/" + url + "/exec";
       U.$("s-url").value = url; U.$("s-token").value = token;
       var note0 = U.$("s-test");
       if (url && !/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url)) {
