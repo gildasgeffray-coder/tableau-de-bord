@@ -40,7 +40,22 @@ var Settings = (function () {
       setTimeout(function () { location.replace(location.pathname + "?r=" + Date.now()); }, 150);
     };
     U.$("s-save").onclick = function () {
-      var url = U.$("s-url").value.trim(), token = U.$("s-token").value.trim();
+      /* Nettoie les copier-coller : espaces, retours à la ligne, caractères invisibles */
+      var clean = function (v) { return v.replace(/[\s​-‍﻿ ]+/g, ""); };
+      var url = clean(U.$("s-url").value), token = clean(U.$("s-token").value);
+      U.$("s-url").value = url; U.$("s-token").value = token;
+      var note0 = U.$("s-test");
+      if (url && !/^https:\/\/script\.google\.com\/macros\/s\/[\w-]+\/exec$/.test(url)) {
+        note0.className = "note err";
+        note0.textContent = "Adresse du moteur incorrecte : elle doit commencer par https://script.google.com/macros/s/ et finir par /exec" +
+          (/\/exec./.test(url) ? " (il y a des caractères en trop après /exec)" : (url.indexOf("/exec") < 0 ? " (la fin /exec manque : copie incomplète ?)" : "")) + ".";
+        return;
+      }
+      if (token && !/^[0-9a-f]{32}$/i.test(token)) {
+        note0.className = "note err";
+        note0.textContent = "Code secret incorrect : il doit faire 32 caractères (lettres a à f et chiffres). Le tien en fait " + token.length + ".";
+        return;
+      }
       var signes = [].slice.call(document.querySelectorAll("#s-signs input:checked")).map(function (i) { return i.value; });
       s = {
         ville: U.$("s-ville").value.trim(), latitude: +U.$("s-lat").value, longitude: +U.$("s-lon").value,
@@ -54,7 +69,12 @@ var Settings = (function () {
           API.setCfg({ url: url, token: token });
           location.reload();
         }).catch(function (e) {
-          note.className = "note err"; note.textContent = "Connexion impossible : " + (e.message || e) + ". Vérifie l'adresse et le code.";
+          var m = String(e.message || e), hint;
+          if (/secret/i.test(m)) hint = "Le code ne correspond pas à celui du moteur (ligne TOKEN dans Apps Script).";
+          else if (/fetch|network|réseau|Délai/i.test(m)) hint = "La tablette n'obtient pas de réponse du moteur. Si cela marche dans Chrome mais pas ici, c'est un réglage de l'application.";
+          else hint = "Vérifie l'adresse et le code.";
+          note.className = "note err";
+          note.textContent = "Connexion impossible (" + m + "). " + hint + " Adresse testée : …" + url.slice(-18) + " · code : " + token.length + " caractères.";
         });
       } else {
         API.setCfg(null);
