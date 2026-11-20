@@ -40,10 +40,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   padding: 0.9rem;
   grid-gap: 0.9rem;
   grid-template-columns: 1.1fr 1fr 1fr;
-  grid-template-rows: 0.8fr 0.95fr 1fr;
+  grid-template-rows: 0.78fr 0.56fr 0.5fr 1.1fr;
   grid-template-areas:
     "clock   agenda cal"
     "weather agenda cal"
+    "weather agenda quote"
     "weather agenda horo";
 }
 .c-clock { grid-area: clock; }
@@ -51,6 +52,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .c-agenda { grid-area: agenda; }
 .c-cal { grid-area: cal; }
 .c-horo { grid-area: horo; }
+.c-quote { grid-area: quote; }
 
 .card {
   position: relative;
@@ -164,13 +166,19 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .cal-day .dot.bd { background: #ff8fc8; }
 .cal-day.today .dot { background: #04261a; }
 
+/* ---------- Citation du jour ---------- */
+.c-quote { justify-content: center; padding-left: 3.2rem; }
+.qt-mark { position: absolute; left: 0.8rem; top: 0.2rem; font-size: 4rem; line-height: 1; color: var(--green); opacity: 0.55; font-family: Georgia, serif; }
+.qt-text { font-size: 1rem; line-height: 1.35; font-style: italic; color: var(--text); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; }
+.qt-author { font-size: 0.8rem; color: var(--blue); margin-top: 0.3rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
 /* ---------- Horoscope ---------- */
 #hr-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .hr-sign { display: flex; align-items: baseline; }
 .hr-glyph { font-size: 1.9rem; color: var(--green); margin-right: 0.5rem; line-height: 1; }
 .hr-name { font-size: 1.3rem; font-weight: 500; }
 .hr-name small { font-size: 0.8rem; color: var(--dim); margin-left: 0.5rem; font-weight: 400; }
-.hr-text { font-size: 1.08rem; line-height: 1.45; color: #cfd9f5; margin-top: 0.4rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 9; -webkit-box-orient: vertical; }
+.hr-text { font-size: 1.02rem; line-height: 1.4; color: #cfd9f5; margin-top: 0.4rem; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 9; -webkit-box-orient: vertical; }
 .hr-src { font-size: 0.7rem; color: var(--dim); margin-top: auto; padding-top: 0.3rem; }
 .hr-dot { display: inline-block; width: 0.45rem; height: 0.45rem; border-radius: 50%; background: var(--dim); margin-left: 0.3rem; }
 .hr-dot.on { background: var(--green); }
@@ -234,11 +242,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       "clock   clock"
       "weather weather"
       "agenda  cal"
+      "quote   quote"
       "horo    horo";
   }
   .c-clock { min-height: 12rem; }
   .c-agenda { max-height: 26rem; }
 }
 @media (max-width: 560px) {
-  .grid { grid-template-columns: 1fr; grid-template-areas: "clock" "weather" "agenda" "cal" "horo"; }
+  .grid { grid-template-columns: 1fr; grid-template-areas: "clock" "weather" "agenda" "cal" "quote" "horo"; }
 }

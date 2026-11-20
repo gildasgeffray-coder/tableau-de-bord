@@ -34,6 +34,7 @@ function handle_(p) {
       case 'deleteEvent': out = deleteEvent_(p.data); break;
       case 'horoscope': out = getHoroscope_(String(p.signs || '').split(',')); break;
       case 'indoor': out = getIndoor_(); break;
+      case 'quote': out = getQuote_(); break;
       default: throw new Error('Action inconnue : ' + p.action);
     }
     return json_({ ok: true, data: out });
@@ -74,6 +75,12 @@ function testCozytouch() {
   CacheService.getScriptCache().remove('cozy_indoor');
   var r = getIndoor_();
   Logger.log(JSON.stringify(r, null, 2));
+}
+
+/** À lancer depuis l'éditeur pour vérifier la citation du jour. */
+function testCitation() {
+  CacheService.getScriptCache().remove('quote_' + ymd_(new Date()));
+  Logger.log(JSON.stringify(getQuote_(), null, 2));
 }
 
 /** À lancer depuis l'éditeur pour vérifier l'horoscope. */
@@ -255,6 +262,44 @@ function decode_(s) {
   return s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#0?39;/g, "'")
     .replace(/&nbsp;/g, ' ').replace(/&#(\d+);/g, function (m, n) { return String.fromCharCode(+n); })
     .replace(/&amp;/g, '&');
+}
+
+/* ======================= Citation du jour ======================= */
+/* Source : citationdujour.fr, une citation publiée chaque nuit vers 3 h.
+   On lit le premier article de la page d'accueil : la citation, son auteur et sa date. */
+
+function getQuote_() {
+  var cache = CacheService.getScriptCache();
+  var key = 'quote_' + ymd_(new Date());
+  var hit = cache.get(key);
+  if (hit) return JSON.parse(hit);
+  var props = PropertiesService.getScriptProperties();
+  var q = null;
+  try {
+    var res = UrlFetchApp.fetch('https://citationdujour.fr/', { muteHttpExceptions: true });
+    if (res.getResponseCode() === 200) q = parseQuote_(res.getContentText('UTF-8'));
+  } catch (e) { /* site injoignable : on garde la dernière citation */ }
+  if (q) {
+    q.source = 'citationdujour.fr';
+    props.setProperty('LAST_QUOTE', JSON.stringify(q));
+    cache.put(key, JSON.stringify(q), 3 * 3600);
+    return q;
+  }
+  var last = props.getProperty('LAST_QUOTE');
+  return last ? JSON.parse(last) : null;
+}
+
+function parseQuote_(html) {
+  var art = html.match(/<article\b[\s\S]*?<\/article>/);
+  if (!art) return null;
+  var a = art[0];
+  var t = a.match(/class="entry-title[^"]*"[^>]*>([\s\S]*?)<\/h2>/);
+  var au = a.match(/class="lauteur"[^>]*>([\s\S]*?)<\/a>/);
+  var d = a.match(/datetime="(\d{4}-\d{2}-\d{2})/);
+  var clean = function (x) { return decode_(x.replace(/<[^>]+>/g, ' ')).replace(/&#8217;/g, '\u2019').replace(/\s+/g, ' ').trim(); };
+  var text = t ? clean(t[1]) : '';
+  if (text.length < 5) return null;
+  return { text: text, author: au ? clean(au[1]) : '', date: d ? d[1] : '' };
 }
 
 /* ======================= Cozytouch (radiateurs Atlantic) ======================= */

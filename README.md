@@ -12,12 +12,13 @@ Tableau de bord personnel pour une Samsung Galaxy Tab A 10.1 (SM-T580) en mode p
 4. Agenda Google : rendez-vous du jour, à venir, anniversaires, alerte avant un rendez-vous ; ajout, modification et suppression.
 5. Calendrier mensuel.
 6. Horoscope du jour (Lion, Sagittaire, Vierge), source mon-horoscope-du-jour.com.
+7. Citation du jour avec son auteur, source citationdujour.fr.
 
 ## Architecture
 
 1. `index.html`, `css/`, `js/` : l'affichage, en JavaScript simple sans compilation, hébergé sur GitHub Pages.
 2. `apps-script/Code.gs` : le moteur, à installer dans Google Apps Script (voir `apps-script/INSTALLATION.md`).
-   Il lit et modifie Google Agenda, récupère l'horoscope et lit Cozytouch.
+   Il lit et modifie Google Agenda, récupère l'horoscope et la citation du jour, et lit Cozytouch.
 3. L'adresse du moteur et son code secret sont saisis dans les réglages de la tablette et n'apparaissent jamais dans ce dépôt.
 
 Sans moteur configuré, l'application fonctionne en mode démo (voyant orange).

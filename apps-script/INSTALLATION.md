@@ -1,6 +1,6 @@
 # Installer le moteur Google (15 minutes, gratuit)
 
-Le moteur fait le lien entre la tablette et ton Google Agenda, l'horoscope et tes radiateurs Cozytouch.
+Le moteur fait le lien entre la tablette et ton Google Agenda, l'horoscope, la citation du jour et tes radiateurs Cozytouch.
 Il tourne dans ton propre compte Google : personne d'autre n'y a accès.
 
 Fais ces étapes sur un ordinateur, c'est plus confortable que sur la tablette.
@@ -49,6 +49,8 @@ Fais ces étapes sur un ordinateur, c'est plus confortable que sur la tablette.
    S'il affiche une erreur, copie-la et envoie-la à Claude.
 2. Choisis la fonction `testHoroscope` et clique sur **Exécuter**.
    Le journal doit afficher le texte du jour pour le Lion, le Sagittaire et la Vierge.
+3. Choisis la fonction `testCitation` et clique sur **Exécuter**.
+   Le journal doit afficher la citation du jour et son auteur.
 
 ## 6. Mettre le moteur en ligne
 

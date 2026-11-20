@@ -20,7 +20,7 @@ var Settings = (function () {
       return '<label><input type="checkbox" value="' + k + '"' + (g.signes.indexOf(k) >= 0 ? " checked" : "") + "> " + Horoscope.SIGNES[k].n + "</label>";
     }).join("");
     var html = "<h2>Réglages</h2>" +
-      "<h3>Moteur Google (agenda, horoscope, Cozytouch)</h3>" +
+      "<h3>Moteur Google (agenda, horoscope, citation, Cozytouch)</h3>" +
       '<div class="field"><label>Adresse du moteur (URL Apps Script se terminant par /exec)</label><input type="url" id="s-url" value="' + U.esc(be.url || "") + '"></div>' +
       '<div class="field"><label>Code secret</label><input type="text" id="s-token" value="' + U.esc(be.token || "") + '" autocomplete="off"></div>' +
       '<p class="note" id="s-test"></p>' +
