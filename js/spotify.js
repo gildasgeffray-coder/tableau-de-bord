@@ -4,6 +4,7 @@ var Spotify = (function () {
   var st = null;          /* dernier état reçu */
   var timer = null, tick = null;
   var busy = false;
+  var lastError = null;  /* message d'erreur du moteur, affiché dans le bloc */
 
   var ICON = {
     prev: '<svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM9.5 12l8.5 6V6z" fill="currentColor"/></svg>',
@@ -28,7 +29,12 @@ var Spotify = (function () {
       el.innerHTML = '<div class="sp-idle">' + ICON.note + '<div>La musique en cours s\'affichera ici une fois Spotify relié.<span class="demo-tag">démo</span></div></div>';
       return;
     }
-    if (!st) { el.innerHTML = '<div class="loading">Chargement…</div>'; return; }
+    if (!st) {
+      el.innerHTML = lastError
+        ? '<div class="sp-idle">' + ICON.note + "<div>Spotify indisponible.<br><small>" + U.esc(lastError) + "</small></div></div>"
+        : '<div class="loading">Chargement…</div>';
+      return;
+    }
     if (!st.linked) {
       el.innerHTML = '<div class="sp-idle">' + ICON.note + '<div>Spotify n\'est pas encore relié.<br><small>Voir le guide d\'installation, partie Spotify.</small></div></div>';
       return;
@@ -73,9 +79,10 @@ var Spotify = (function () {
   function fetchState() {
     if (!API.isLive()) { render(); return; }
     API.get("spotifyState").then(function (d) {
-      st = d; Status.set("spotify", null); render();
+      st = d; lastError = null; Status.set("spotify", null); render();
       schedule(d && d.active && d.playing ? 15000 : 60000);
     }).catch(function (e) {
+      lastError = String(e.message || e);
       Status.set("spotify", e); render(); schedule(60000);
     });
   }
