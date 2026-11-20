@@ -35,7 +35,10 @@ var Settings = (function () {
       '<div class="actions"><button class="btn-second" id="s-reload">Recharger</button><button class="btn-second" data-close>Annuler</button><button class="btn-primary" id="s-save">Enregistrer</button></div>';
     Modal.open(html);
 
-    U.$("s-reload").onclick = function () { location.reload(); };
+    U.$("s-reload").onclick = function () {
+      var bt = U.$("s-reload"); bt.textContent = "Rechargement…"; bt.disabled = true;
+      setTimeout(function () { location.replace(location.pathname + "?r=" + Date.now()); }, 150);
+    };
     U.$("s-save").onclick = function () {
       var url = U.$("s-url").value.trim(), token = U.$("s-token").value.trim();
       var signes = [].slice.call(document.querySelectorAll("#s-signs input:checked")).map(function (i) { return i.value; });
