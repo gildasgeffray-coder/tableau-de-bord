@@ -24,6 +24,10 @@ var Settings = (function () {
       '<div class="field"><label>Adresse du moteur (URL Apps Script se terminant par /exec)</label><input type="url" id="s-url" value="' + U.esc(be.url || "") + '"></div>' +
       '<div class="field"><label>Code secret</label><input type="text" id="s-token" value="' + U.esc(be.token || "") + '" autocomplete="off"></div>' +
       '<p class="note" id="s-test"></p>' +
+      (be.url && be.token ? "<h3>Spotify</h3>" +
+        '<p class="note">À faire une seule fois, après avoir créé l\'application Spotify et renseigné ses deux codes dans le moteur. ' +
+        "Une fois relié, reviens au tableau (menu Fully, puis Go to Start URL).</p>" +
+        '<div class="actions" style="justify-content:flex-start;margin-top:.5rem"><button class="btn-second" id="s-spotify">Relier Spotify</button></div>' : "") +
       "<h3>Horoscope</h3><div class=\"signs\" id=\"s-signs\">" + signs + "</div>" +
       "<h3>Lieu de la météo</h3>" +
       '<div class="row"><div class="field"><label>Ville</label><input type="text" id="s-ville" value="' + U.esc(g.ville) + '"></div>' +
@@ -35,6 +39,9 @@ var Settings = (function () {
       '<div class="actions"><button class="btn-second" id="s-reload">Recharger</button><button class="btn-second" data-close>Annuler</button><button class="btn-primary" id="s-save">Enregistrer</button></div>';
     Modal.open(html);
 
+    if (U.$("s-spotify")) U.$("s-spotify").onclick = function () {
+      location.href = be.url + "?action=spotifyLogin&token=" + encodeURIComponent(be.token);
+    };
     U.$("s-reload").onclick = function () {
       var bt = U.$("s-reload"); bt.textContent = "Rechargement…"; bt.disabled = true;
       setTimeout(function () { location.replace(location.pathname + "?r=" + Date.now()); }, 150);

@@ -335,7 +335,12 @@ function spotifyPages_(p) {
   var redirect = spotifyRedirect_();
   try {
     if (p.action === 'spotifyLogin') {
-      if (!tok || p.token !== tok) return html_('Accès refusé', '<p>Code secret incorrect dans l\'adresse.</p>');
+      var given = String(p.token || '').replace(/[^0-9a-f]/gi, '');  /* tolère espaces et caractères parasites */
+      if (!tok || given !== tok) {
+        return html_('Accès refusé', '<p>Code secret incorrect dans l\'adresse.</p><p>Code reçu : ' + given.length +
+          ' caractères (il en faut 32)' + (given ? ', commençant par « ' + escHtml_(given.slice(0, 4)) + ' »' : '') + '.</p>' +
+          '<p>Le plus simple : sur la tablette, ouvre la roue dentée du tableau et touche « Relier Spotify ».</p>');
+      }
       var id = props.getProperty('SPOTIFY_CLIENT_ID');
       if (!id || !props.getProperty('SPOTIFY_CLIENT_SECRET')) {
         return html_('Spotify : réglages manquants', '<p>Ajoute SPOTIFY_CLIENT_ID et SPOTIFY_CLIENT_SECRET dans les propriétés du script.</p>');
